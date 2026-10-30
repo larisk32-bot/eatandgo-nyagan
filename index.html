@@ -327,6 +327,8 @@ function grid(){
 }
 const total=()=>Object.entries(cart).reduce((s,[id,q])=>s+byId(id).p*q,0);
 const count=()=>Object.values(cart).reduce((a,b)=>a+b,0);
+// акция до 05.11: одна порция крыльев BBQ в подарок к каждой пицце
+const giftQty=()=>Object.entries(cart).reduce((s,[id,q])=>s+(byId(id).c==='pizza'?q:0),0);
 function save(){S.set('eg_cart',cart);document.querySelectorAll('.cnt').forEach(e=>e.textContent=count());grid();if(stage!=='done')drawer()}
 function drawer(){
   const body=document.getElementById('dbody'),foot=document.getElementById('dfoot'),ids=Object.keys(cart);
@@ -334,7 +336,8 @@ function drawer(){
   if(!ids.length){body.innerHTML='<p class="empty">Корзина пуста.<br>Добавьте что-нибудь вкусное 🔥</p>';foot.innerHTML='';return}
   const list=ids.map(id=>{const m=byId(id);return `<div class="ci"><img src="img/${m.img}" alt=""><div class="t">${esc(m.n)}<small>${rub(m.p)}</small></div>
    <div class="qty"><button data-q="${id}" data-d="-1" type="button">−</button><b>${cart[id]}</b><button data-q="${id}" data-d="1" type="button">+</button></div></div>`}).join('');
-  const gift=ids.some(id=>byId(id).c==='pizza')?'<p style="color:var(--fire);font-weight:800;font-size:14px;margin-top:10px">🎁 Крылья BBQ в подарок к пицце</p>':'';
+  const gq=giftQty();
+  const gift=gq?`<div class="ci"><img src="img/wings_pizza.jpg" alt=""><div class="t">Крылья острые BBQ<small style="color:var(--fire)">🎁 подарок к пицце · <s>${rub(byId('n1').p)}</s> 0 ₽</small></div><div class="qty"><b>${gq}</b></div></div>`:'';
   if(stage==='cart'){
     body.innerHTML=list+gift;
     foot.innerHTML=`<div class="sum"><span>Итого</span><span>${rub(total())}</span></div><button class="btn" id="toForm" type="button">Оформить заказ</button>`;
@@ -369,7 +372,7 @@ document.addEventListener('click',e=>{
     document.getElementById('oErr').style.display=ok?'none':'block';if(!ok)return;
     const no=Math.floor(100+Math.random()*900);
     const lines=Object.entries(cart).map(([id,q])=>`• ${byId(id).n} × ${q} — ${rub(byId(id).p*q)}`).join('\n');
-    const gift=Object.keys(cart).some(id=>byId(id).c==='pizza')?'\n🎁 Крылья BBQ в подарок':'';
+    const gift=giftQty()?`\n• 🎁 Крылья острые BBQ × ${giftQty()} — 0 ₽ (акция «пицца + крылья»)`:'';
     const msg=`🆕 Заказ №${no}\n${lines}${gift}\nИтого: ${rub(total())}\n${way}${way==='Доставка'?': '+v('oAddr'):''}\n${v('oName')}, ${v('oPhone')}\nОплата: ${v('oPay')}${v('oNote')?'\nКомментарий: '+v('oNote'):''}`;
     cart={};S.set('eg_cart',cart);document.querySelectorAll('.cnt').forEach(e=>e.textContent=0);grid();stage='done';
     document.getElementById('dbody').innerHTML=`<div class="done"><h3>Заказ принят! 🔥</h3><p style="color:var(--muted)">Мы перезвоним для подтверждения.</p><p style="margin-top:16px;font-weight:800">Так заказ придёт в Telegram заведения:</p><pre>${esc(msg)}</pre><p style="color:var(--muted);font-size:13px;margin-top:12px">Демо: заказ никуда не отправлен.</p></div>`;
