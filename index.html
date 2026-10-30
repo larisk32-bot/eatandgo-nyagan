@@ -391,7 +391,7 @@ function drawer(){
     const dl=F.way==='Доставка', z=ZONES[F.zone], fee=deliveryFee(), sub=total(), MIN_ORDER=dl?(ZONES[F.zone].min||0):0, short=dl&&sub<MIN_ORDER;
     body.innerHTML=`${list}${gift}
      <div class="seg"><label><input type="radio" name="way" value="Доставка" ${dl?'checked':''}><span>🛵 Доставка</span></label><label><input type="radio" name="way" value="Самовывоз" ${dl?'':'checked'}><span>🏃 Самовывоз</span></label></div>
-     ${dl?`<div class="f"><label for="oZone">Район доставки</label><select id="oZone">${ZONES.map((x,i)=>`<option value="${i}" ${i==F.zone?'selected':''}>${esc(x.n)} · ${x.p} ₽${x.min?' · от '+x.min+' ₽':''}</option>`).join('')}</select></div>
+     ${dl?`<div class="f"><label for="oZone">Район доставки${F.zoneAuto?' <span style="color:var(--lime)">· определён по адресу ✓</span>':''}</label><select id="oZone">${ZONES.map((x,i)=>`<option value="${i}" ${i==F.zone?'selected':''}>${esc(x.n)} · ${x.p} ₽${x.min?' · от '+x.min+' ₽':''}</option>`).join('')}</select></div>
      <div class="f ac"><label for="oStreet">Улица и дом *</label><input id="oStreet" value="${esc(F.street)}" autocomplete="off" placeholder="Начните вводить: Ленина 5"><ul class="sug" id="sugSt"></ul></div>
      ${F.coords?`<div class="route"><iframe title="Маршрут курьера" loading="lazy" src="https://yandex.ru/map-widget/v1/?rtext=${SHOP[0]},${SHOP[1]}~${F.coords[0]},${F.coords[1]}&rtt=auto"></iframe><p class="note2" id="routeInfo">${esc(F.routeInfo||'Считаем расстояние…')}</p></div>`:''}
      <div class="addr4"><div class="f"><label>Подъезд</label><input id="oEnt" inputmode="numeric" value="${esc(F.ent)}"></div><div class="f"><label>Этаж</label><input id="oFloor" inputmode="numeric" value="${esc(F.floor)}"></div><div class="f"><label>Кв./офис</label><input id="oFlat" value="${esc(F.flat)}"></div><div class="f"><label>Домофон</label><input id="oDoor" value="${esc(F.door)}"></div></div>`
@@ -412,25 +412,32 @@ function drawer(){
   }
 }
 // ── доставка (значения-пример, в рабочей версии меняются в админке) ──
-const ZONES=CFG.zones&&CFG.zones.length?CFG.zones:[{n:'Центр, 1–4 мкр',p:150,min:600,eta:45},{n:'5–14 мкр',p:200,min:800,eta:55},{n:'Частный сектор, окраины',p:300,min:1200,eta:70}];
+const ZONES=CFG.zones&&CFG.zones.length?CFG.zones:[{n:'Центр, 1–4 мкр',p:150,min:600,eta:45,km:3},{n:'5–14 мкр',p:200,min:800,eta:55,km:7},{n:'Частный сектор, окраины',p:300,min:1200,eta:70,km:0}];
+// район по расстоянию от заведения: первый, у которого «до N км» покрывает адрес; km:0 — «дальше всех»
+const zoneByKm=d=>{const ok=ZONES.map((z,i)=>({z,i})).filter(x=>x.z.km>0&&d<=x.z.km).sort((a,b)=>a.z.km-b.z.km)[0];return ok?ok.i:(ZONES.findIndex(z=>!z.km)>=0?ZONES.findIndex(z=>!z.km):ZONES.length-1)};
 const FREE_FROM=CFG.freeFrom||2000, PAUSED=!!CFG.paused;
-let F={coords:null,routeInfo:'',way:'Доставка',zone:0,street:'',ent:'',floor:'',flat:'',door:'',when:'asap',time:'',name:'',phone:'',pay:'Наличными',change:'1000 ₽',note:''};
+let F={coords:null,routeInfo:'',zoneAuto:false,way:'Доставка',zone:0,street:'',ent:'',floor:'',flat:'',door:'',when:'asap',time:'',name:'',phone:'',pay:'Наличными',change:'1000 ₽',note:''};
 if(F.zone>=ZONES.length)F.zone=0;
 const deliveryFee=()=>F.way!=='Доставка'||total()>=FREE_FROM?0:ZONES[F.zone].p;
 
 // ── подсказки адреса доставки (OpenStreetMap/Photon) и маршрут от заведения (виджет Яндекс Карт + OSRM) ──
 // в рабочей версии — DaData или Геосаджест Яндекса с ключом заказчика
 const SHOP=[62.15387,65.45747]; // ТЦ «Орбита», Пионерская 28а
-let stTmr=null, stItems=[], stAct=-1;
+let stTmr=null, stItems=[], stAct=-1, stSeq=0;
 const stClose=()=>{const u=document.getElementById('sugSt');if(u)u.classList.remove('on');stAct=-1};
 document.addEventListener('input',e=>{if(e.target.id!=='oStreet')return;F.street=e.target.value;if(F.coords){F.coords=null;F.routeInfo=''}
   clearTimeout(stTmr);const q=e.target.value.trim();if(q.length<3){stClose();return}
-  stTmr=setTimeout(async()=>{try{const d=await (await fetch(`https://photon.komoot.io/api/?q=${encodeURIComponent(q+' Нягань')}&limit=12&lat=${SHOP[0]}&lon=${SHOP[1]}&layer=house&layer=street`)).json();
+  stTmr=setTimeout(async()=>{const my=++stSeq;try{const d=await (await fetch(`https://photon.komoot.io/api/?q=${encodeURIComponent(q+' Нягань')}&limit=15&lat=${SHOP[0]}&lon=${SHOP[1]}&layer=house&layer=street`)).json();
+    if(my!==stSeq)return; // пришёл ответ на старый запрос — пропускаем, пользователь уже допечатал
     const seen=new Set();stItems=d.features.filter(f=>f.properties.city==='Нягань').map(f=>{const pp=f.properties;
       const t=pp.type==='street'?pp.name:`${(pp.street||pp.name||'').replace(/^улица /,'')}${pp.housenumber?', '+pp.housenumber:''}`;return {t,c:[f.geometry.coordinates[1],f.geometry.coordinates[0]],street:pp.type==='street'}})
       .filter(x=>x.t&&!seen.has(x.t)&&seen.add(x.t)).slice(0,6);
+    // дома нет на карте, но улица есть — предлагаем «улица, номер» по точке улицы
+    const num=(q.match(/(\d+[а-яa-z]?(\/\d+)?)\s*$/i)||[])[1];
+    const st=stItems.find(x=>x.street), stName=st&&st.t.replace(/^(улица|проспект|переулок|проезд) /,'');
+    if(num&&st&&!stItems.some(x=>!x.street&&x.t.toLowerCase()===(stName+', '+num).toLowerCase()))stItems.unshift({t:stName+', '+num,c:st.c,approx:true});
     const u=document.getElementById('sugSt');if(!u)return;
-    u.innerHTML=stItems.length?stItems.map((x,i)=>`<li data-si="${i}">${esc(x.t)}<small>${x.street?'улица, допишите номер дома':'Нягань'}</small></li>`).join(''):'<li style="cursor:default;color:var(--muted)">Не нашли, впишите как есть</li>';u.classList.add('on')}catch(err){stClose()}},300)});
+    u.innerHTML=stItems.length?stItems.map((x,i)=>`<li data-si="${i}">${esc(x.t)}<small>${x.approx?'дома нет на карте, курьер найдёт по адресу':x.street?'улица, допишите номер дома':'Нягань'}</small></li>`).join(''):'<li style="cursor:default;color:var(--muted)">Не нашли, впишите как есть</li>';u.classList.add('on')}catch(err){stClose()}},300)});
 document.addEventListener('mousedown',e=>{const li=e.target.closest('#sugSt li[data-si]');if(!li)return;e.preventDefault();const x=stItems[+li.dataset.si];
   readForm();F.street=x.street?x.t+', ':x.t;stClose();
   if(x.street){drawer();const i=document.getElementById('oStreet');i.focus();i.setSelectionRange(i.value.length,i.value.length);return}
@@ -442,7 +449,8 @@ document.addEventListener('focusout',e=>{if(e.target.id==='oStreet')setTimeout(s
 async function routeDist(){const c=F.coords;if(!c)return;
   try{const r=await (await fetch(`https://router.project-osrm.org/route/v1/driving/${SHOP[1]},${SHOP[0]};${c[1]},${c[0]}?overview=false`)).json();if(F.coords!==c)return;
     const km=r.routes[0].distance/1000,min=Math.max(3,Math.round(r.routes[0].duration/60));
-    F.routeInfo=`🛵 От нас ≈ ${km<10?km.toFixed(1).replace('.',','):Math.round(km)} км, курьеру ~${min} мин в пути`}catch(err){F.routeInfo='Маршрут на карте выше'}
+    F.routeInfo=`🛵 От нас ≈ ${km<10?km.toFixed(1).replace('.',','):Math.round(km)} км, курьеру ~${min} мин в пути`;
+    F.zone=zoneByKm(km);F.zoneAuto=true;readForm();F.zone=zoneByKm(km);drawer();return}catch(err){F.routeInfo='Маршрут на карте выше'}
   const el=document.getElementById('routeInfo');if(el)el.textContent=F.routeInfo}
 function slots(){const r=[],n=new Date(),end=[5,6].includes(n.getDay())?26:24;let t=new Date(n.getTime()+70*60e3);t.setMinutes(t.getMinutes()<30?30:60,0,0);
   while(t.getHours()+(t.getDate()!==n.getDate()?24:0)<end&&r.length<14){r.push(t.toTimeString().slice(0,5));t=new Date(t.getTime()+30*60e3)}return r}
@@ -450,7 +458,7 @@ function readForm(){const v=id=>{const e=document.getElementById(id);return e?e.
   for(const [k,id] of [['street','oStreet'],['ent','oEnt'],['floor','oFloor'],['flat','oFlat'],['door','oDoor'],['name','oName'],['phone','oPhone'],['pay','oPay'],['change','oChange'],['note','oNote']]){const x=v(id);if(x!==undefined)F[k]=x}
   const z=v('oZone');if(z!==undefined)F.zone=+z}
 document.addEventListener('change',e=>{if(!e.target.closest('#dbody'))return;readForm();
-  if(e.target.name==='way'){F.way=e.target.value;drawer()}else if(e.target.name==='when'){F.when=e.target.value;drawer()}else if(['oZone','oPay'].includes(e.target.id))drawer()});
+  if(e.target.name==='way'){F.way=e.target.value;drawer()}else if(e.target.name==='when'){F.when=e.target.value;drawer()}else if(['oZone','oPay'].includes(e.target.id)){if(e.target.id==='oZone')F.zoneAuto=false;drawer()}});
 function openCart(){document.getElementById('shade').classList.add('on');document.getElementById('drawer').classList.add('on');if(stage==='done'){stage='cart'}drawer()}
 function closeCart(){document.getElementById('shade').classList.remove('on');document.getElementById('drawer').classList.remove('on')}
 document.addEventListener('click',e=>{
