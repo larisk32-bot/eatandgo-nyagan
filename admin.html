@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Админка EATandGO (демо)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Manrope:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0e0f0d;--bg2:#171916;--bg3:#20231f;--line:rgba(255,255,255,.09);--text:#f4f6ef;--muted:#a4a99c;--lime:#8dc63f;--lime2:#a8dd52;--red:#e5322d;--fire:#ff7a1a}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font:400 16px/1.5 Manrope,system-ui,sans-serif;-webkit-font-smoothing:antialiased;min-height:100vh}
+button,input,select{font:inherit;color:inherit}
+.wrap{max-width:980px;margin:0 auto;padding:0 16px}
+.demo-bar{background:var(--lime);color:var(--bg);text-align:center;font:800 13px/1.3 Manrope;padding:7px 16px}
+.os{font-family:Oswald,Impact,sans-serif;text-transform:uppercase}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:13px 20px;border-radius:12px;background:var(--lime);color:var(--bg);font:700 16px/1 Oswald;text-transform:uppercase;letter-spacing:.03em;border:0;cursor:pointer}
+.btn.ghost{background:transparent;color:var(--text);border:1px solid var(--line)}
+.btn.sm{padding:9px 12px;font-size:14px}
+.login{min-height:calc(100vh - 32px);display:grid;place-items:center;padding:20px}
+.lbox{background:var(--bg2);border:1px solid var(--line);border-radius:22px;padding:30px 26px;max-width:380px;width:100%;text-align:center}
+.lbox h1{font:700 30px/1.1 Oswald;text-transform:uppercase;margin-bottom:8px}.lbox h1 span{color:var(--lime)}
+.lbox p{color:var(--muted);font-size:14px;margin-bottom:18px}
+.lbox input{width:100%;background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:10px}
+.lbox small{display:block;color:var(--muted);margin-top:14px;font-size:13px}.lbox small b{color:var(--lime)}
+.err{color:#ff8a80;font-weight:800;font-size:14px}
+.top{position:sticky;top:0;z-index:5;background:rgba(14,15,13,.94);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.top .wrap{display:flex;align-items:center;justify-content:space-between;height:58px}
+.top b{font:700 20px Oswald}.top b span{color:var(--lime)}
+.tabs{display:flex;gap:6px;overflow-x:auto;padding:14px 0 6px;scrollbar-width:none}
+.tab{flex:none;background:var(--bg2);border:1px solid var(--line);border-radius:12px;padding:10px 14px;font-weight:800;font-size:14px;color:var(--muted);cursor:pointer}
+.tab.on{background:var(--lime);border-color:var(--lime);color:var(--bg)}
+h2{font:700 26px/1.1 Oswald;text-transform:uppercase;margin:16px 0 6px}
+.hint{color:var(--muted);font-size:14px;margin-bottom:14px}
+.grp{font:800 12px/1 Manrope;letter-spacing:.14em;text-transform:uppercase;color:var(--lime);margin:18px 0 8px}
+.it{display:grid;grid-template-columns:64px 1fr auto;gap:12px;align-items:center;background:var(--bg2);border:1px solid var(--line);border-radius:16px;padding:10px;margin-bottom:8px}
+.it.off{opacity:.55}
+.it .ph{position:relative;width:64px;height:64px;border-radius:12px;overflow:hidden;cursor:pointer}
+.it .ph img{width:100%;height:100%;object-fit:cover}
+.it .ph span{position:absolute;inset:auto 0 0 0;background:rgba(0,0,0,.65);font:800 10px Manrope;text-align:center;padding:2px 0}
+.it .nm input{width:100%;background:transparent;border:0;border-bottom:1px dashed transparent;font-weight:800;padding:2px 0}
+.it .nm input:focus{outline:none;border-bottom-color:var(--lime)}
+.it .nm small{color:var(--muted);font-size:12px}
+.it .rt{display:flex;flex-direction:column;align-items:flex-end;gap:6px}
+.pr{width:84px;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:7px 8px;text-align:right;font:700 16px Oswald}
+.pr.chg{border-color:var(--lime);color:var(--lime)}
+.sw{position:relative;width:50px;height:28px;border-radius:999px;border:0;background:var(--bg3);cursor:pointer;flex:none}
+.sw::after{content:"";position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;transition:left .15s}
+.sw.on{background:var(--lime)}.sw.on::after{left:25px}
+.sw.red.on{background:var(--red)}
+.zone{display:grid;grid-template-columns:1.6fr repeat(3,1fr) auto;gap:8px;align-items:end;background:var(--bg2);border:1px solid var(--line);border-radius:16px;padding:12px;margin-bottom:8px}
+.zone label{display:block;font-size:11px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px}
+.zone input,.set input{width:100%;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:9px 10px}
+.del{background:none;border:1px solid var(--line);border-radius:10px;padding:9px 11px;color:#ff8a80;cursor:pointer}
+.set{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:10px}
+.set label{display:block;font-size:12px;font-weight:800;color:var(--muted);margin-bottom:4px}
+.pause{display:flex;justify-content:space-between;align-items:center;gap:12px;background:var(--bg2);border:1px solid var(--line);border-radius:16px;padding:14px 16px;margin-top:14px;font-weight:800}
+.pause.on{background:#3b0f0c;border-color:var(--red)}
+.toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:var(--lime);color:var(--bg);font-weight:800;padding:10px 18px;border-radius:999px;opacity:0;transition:opacity .2s;pointer-events:none;z-index:50}
+.toast.on{opacity:1}
+.hide{display:none!important}
+.note{color:var(--muted);font-size:13px;text-align:center;margin:24px 0 40px}
+@media (max-width:640px){.zone{grid-template-columns:1fr 1fr 1fr}.zone .zn{grid-column:1/-1}.set{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+<div class="demo-bar">Демо-админка: изменения сохраняются на этом устройстве и сразу видны на демо-сайте</div>
+
+<section class="login" id="login">
+  <form class="lbox" id="lf" novalidate>
+    <h1>EAT<span>and</span>GO</h1>
+    <p>Вход для владельца и администраторов</p>
+    <input id="lg" placeholder="Логин" autocomplete="username">
+    <input id="pw" type="password" placeholder="Пароль" autocomplete="current-password">
+    <p class="err hide" id="le">Неверный логин или пароль</p>
+    <button class="btn" type="submit" style="width:100%">Войти</button>
+    <small>Демо: логин <b>admin</b>, пароль <b>eatandgo</b>. В рабочей версии ещё и вход через Telegram, как на «Разливном».</small>
+  </form>
+</section>
+
+<div id="panel" class="hide">
+  <div class="top"><div class="wrap"><b>EAT<span>and</span>GO · админка</b><a class="btn ghost sm" href="index.html" target="_blank">Открыть сайт ↗</a></div></div>
+  <main class="wrap">
+    <div class="tabs">
+      <button class="tab on" data-t="menu" type="button">🍔 Меню, фото, стоп-лист</button>
+      <button class="tab" data-t="del" type="button">🛵 Доставка и районы</button>
+      <button class="tab" data-t="work" type="button">⏰ Работа и пауза</button>
+    </div>
+
+    <div id="t-menu">
+      <h2>Меню</h2>
+      <p class="hint">Переключатель — в наличии или нет (стоп-лист). Нажмите на фото, чтобы заменить. Название и цену меняйте прямо в полях.</p>
+      <div id="items"></div>
+    </div>
+
+    <div id="t-del" class="hide">
+      <h2>Районы доставки</h2>
+      <p class="hint">У каждого района своя цена доставки, минимальная сумма заказа и примерное время. Покупатель выбирает район при оформлении.</p>
+      <div id="zones"></div>
+      <button class="btn ghost sm" id="addZone" type="button">+ Добавить район</button>
+      <div class="set">
+        <div><label>Бесплатная доставка от, ₽</label><input id="freeFrom" inputmode="numeric"></div>
+      </div>
+    </div>
+
+    <div id="t-work" class="hide">
+      <h2>Работа и пауза</h2>
+      <div class="pause" id="pauseBox"><span id="pauseTxt"></span><button class="sw red" id="pauseSw" type="button" aria-label="Пауза приёма"></button></div>
+      <p class="hint" style="margin-top:10px">Завал на кухне или нет курьеров — поставьте паузу, и сайт перестанет принимать заказы и попросит позвонить.</p>
+      <button class="btn ghost sm" id="reset" type="button" style="margin-top:14px">↺ Сбросить демо-настройки</button>
+    </div>
+    <p class="note">В рабочей версии всё это хранится на сервере и сразу меняется у всех покупателей.</p>
+  </main>
+</div>
+<div class="toast" id="toast">Сохранено ✓</div>
+<input type="file" id="file" accept="image/*" class="hide">
+
+<script src="menu.js"></script>
+<script>
+const S={get(k,d){try{return JSON.parse(localStorage.getItem(k))??d}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v));return true}catch(e){return false}}};
+const DEF_ZONES=[{n:'Центр, 1–4 мкр',p:150,min:600,eta:45},{n:'5–14 мкр',p:200,min:800,eta:55},{n:'Частный сектор, окраины',p:300,min:1200,eta:70}];
+let C=S.get('eg_cfg',{});C.items=C.items||{};C.zones=C.zones&&C.zones.length?C.zones:JSON.parse(JSON.stringify(DEF_ZONES));C.freeFrom=C.freeFrom||2000;C.paused=!!C.paused;
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const toast=t=>{const e=document.getElementById('toast');e.textContent=t;e.classList.add('on');setTimeout(()=>e.classList.remove('on'),1300)};
+function save(msg){if(!S.set('eg_cfg',C)){toast('Не хватает места: замените фото поменьше');return}toast(msg||'Сохранено ✓')}
+const ov=id=>C.items[id]||(C.items[id]={});
+function renderItems(){let h='',last='';
+  for(const m of MENU){const g=CATS.find(c=>c[0]===m.c)[1];if(g!==last){h+=`<div class="grp">${g}</div>`;last=g}
+    const o=C.items[m.id]||{},off=!!o.off,p=o.p||m.p;
+    h+=`<div class="it${off?' off':''}"><div class="ph" data-ph="${m.id}"><img src="${o.img||'img/'+m.img}" alt=""><span>📷 заменить</span></div>
+      <div class="nm"><input data-n="${m.id}" value="${esc(o.n||m.n)}"><small>${off?'нет в наличии':'в наличии'}${o.p&&o.p!==m.p?' · было '+m.p+' ₽':''}${o.img?' · своё фото':''}</small></div>
+      <div class="rt"><button class="sw${off?'':' on'}" data-off="${m.id}" type="button" aria-label="В наличии"></button><input class="pr${o.p&&o.p!==m.p?' chg':''}" data-p="${m.id}" inputmode="numeric" value="${p}"></div></div>`}
+  document.getElementById('items').innerHTML=h}
+function renderZones(){document.getElementById('zones').innerHTML=C.zones.map((z,i)=>`<div class="zone">
+  <div class="zn"><label>Район</label><input data-z="${i}" data-k="n" value="${esc(z.n)}"></div>
+  <div><label>Доставка, ₽</label><input data-z="${i}" data-k="p" inputmode="numeric" value="${z.p}"></div>
+  <div><label>Минималка, ₽</label><input data-z="${i}" data-k="min" inputmode="numeric" value="${z.min||0}"></div>
+  <div><label>Время, мин</label><input data-z="${i}" data-k="eta" inputmode="numeric" value="${z.eta||60}"></div>
+  <button class="del" data-dz="${i}" type="button" aria-label="Удалить район">✕</button></div>`).join('');
+  document.getElementById('freeFrom').value=C.freeFrom}
+function renderWork(){document.getElementById('pauseBox').classList.toggle('on',C.paused);document.getElementById('pauseSw').classList.toggle('on',C.paused);
+  document.getElementById('pauseTxt').textContent=C.paused?'⏸ Приём заказов на паузе':'▶ Заказы принимаются'}
+function renderAll(){renderItems();renderZones();renderWork()}
+// фото: уменьшаем до 800 px, чтобы влезало в память браузера
+let photoFor=null;
+document.getElementById('file').onchange=e=>{const f=e.target.files[0];if(!f||!photoFor)return;const rd=new FileReader();
+  rd.onload=()=>{const im=new Image();im.onload=()=>{const k=Math.min(1,800/Math.max(im.width,im.height));const cv=document.createElement('canvas');cv.width=Math.round(im.width*k);cv.height=Math.round(im.height*k);
+    cv.getContext('2d').drawImage(im,0,0,cv.width,cv.height);ov(photoFor).img=cv.toDataURL('image/jpeg',.8);save('Фото заменено ✓');renderItems();e.target.value=''};im.src=rd.result};rd.readAsDataURL(f)};
+document.addEventListener('click',e=>{const t=e.target.closest('.tab,[data-off],[data-ph],[data-dz],#addZone,#pauseSw,#reset');if(!t)return;
+  if(t.classList.contains('tab')){document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('on',x===t));['menu','del','work'].forEach(k=>document.getElementById('t-'+k).classList.toggle('hide',k!==t.dataset.t));return}
+  if(t.dataset.off){const o=ov(t.dataset.off);o.off=!o.off;save(o.off?'В стоп-листе ⛔':'Снова в наличии ✓');renderItems()}
+  else if(t.dataset.ph){photoFor=t.dataset.ph;document.getElementById('file').click()}
+  else if(t.dataset.dz){if(C.zones.length<2){toast('Нужен хотя бы один район');return}C.zones.splice(+t.dataset.dz,1);save('Район удалён');renderZones()}
+  else if(t.id==='addZone'){C.zones.push({n:'Новый район',p:250,min:800,eta:60});save('Район добавлен');renderZones()}
+  else if(t.id==='pauseSw'){if(!C.paused&&!confirm('Поставить приём заказов на паузу?'))return;C.paused=!C.paused;save(C.paused?'Пауза включена ⏸':'Заказы снова принимаются ▶');renderWork()}
+  else if(t.id==='reset'){if(!confirm('Сбросить меню, фото и районы к исходным?'))return;try{localStorage.removeItem('eg_cfg')}catch(x){}location.reload()}});
+document.addEventListener('change',e=>{const t=e.target;
+  if(t.dataset.n){const m=MENU.find(x=>x.id===t.dataset.n),v=t.value.trim();ov(m.id).n=v&&v!==m.n?v:undefined;save();renderItems()}
+  else if(t.dataset.p){const m=MENU.find(x=>x.id===t.dataset.p),v=Math.round(+t.value);if(!(v>=1&&v<=100000)){renderItems();return}ov(m.id).p=v!==m.p?v:undefined;save('Цена сохранена ✓');renderItems()}
+  else if(t.dataset.z){const z=C.zones[+t.dataset.z];z[t.dataset.k]=t.dataset.k==='n'?(t.value.trim()||z.n):Math.max(0,Math.round(+t.value)||0);save();renderZones()}
+  else if(t.id==='freeFrom'){C.freeFrom=Math.max(0,Math.round(+t.value)||0);save();renderZones()}});
+function show(on){document.getElementById('login').classList.toggle('hide',on);document.getElementById('panel').classList.toggle('hide',!on);if(on)renderAll()}
+document.getElementById('lf').addEventListener('submit',e=>{e.preventDefault();const ok=document.getElementById('lg').value.trim().toLowerCase()==='admin'&&document.getElementById('pw').value==='eatandgo';
+  document.getElementById('le').classList.toggle('hide',ok);if(ok){try{sessionStorage.setItem('eg_admin','1')}catch(x){}show(true)}});
+let logged=false;try{logged=sessionStorage.getItem('eg_admin')==='1'}catch(x){}show(logged);
+</script>
+</body>
+</html>

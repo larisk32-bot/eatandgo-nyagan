@@ -313,7 +313,7 @@ footer .wrap{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap}
 <footer>
   <div class="wrap">
     <span>© EATandGO · Нягань</span>
-    <a href="https://vk.ru/eatandgo186" target="_blank" rel="noopener">vk.ru/eatandgo186</a>
+    <span><a href="admin.html" style="color:var(--lime)">Демо-админка</a> · <a href="https://vk.ru/eatandgo186" target="_blank" rel="noopener">vk.ru/eatandgo186</a></span>
   </div>
 </footer>
 
@@ -343,42 +343,24 @@ footer .wrap{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap}
   </div>
 </section>
 
+<script src="menu.js"></script>
 <script>
-const CATS=[['shawa','Шаурма'],['burgers','Бургеры'],['pizza','Пицца'],['grill','Гриль'],['snacks','Закуски'],['combo','Комбо']];
-// p: цены из постов группы отмечены real:true, остальные — примерные для демо
-const MENU=[
- {id:'s1',c:'shawa',n:'Шаурма на углях',d:'Мясо с открытого огня, свежие овощи, фирменный соус, лаваш',p:349,img:'shawarma.jpg',tag:'Хит'},
- {id:'s2',c:'shawa',n:'Фермерская шаверма',d:'Легендарная фермерская: большая порция и насыщенный вкус',p:299,img:'shawarma2.jpg'},
- {id:'s3',c:'shawa',n:'Шаурма в сырном лаваше',d:'Поджаренная на гриле, с тягучим сыром',p:379,img:'shawarma.jpg'},
- {id:'b1',c:'burgers',n:'Бургер Фёдор',d:'Говяжья котлета, яйцо, бекон, сыр, лук фри, айсберг, огурец, томат, соус гриль',p:449,img:'burgers_fire.jpg',tag:'Новинка'},
- {id:'b2',c:'burgers',n:'Бургер Дочь Фёдора',d:'Котлета, сыр, айсберг, томаты, огурцы и медовый соус',p:399,img:'burger_hotdog.jpg'},
- {id:'b3',c:'burgers',n:'Бургер EATandGO',d:'Котлета, сыр, овощи, халапеньо, лук фри, соус гриль',p:429,img:'burgers_fire.jpg'},
- {id:'b4',c:'burgers',n:'Так-Мак',d:'6 версий: классика, сырный, острый, BBQ, мощный, цезарь',p:299,img:'burger_hotdog.jpg'},
- {id:'z1',c:'pizza',n:'Пепперони',d:'Море колбасок и тянущийся сыр',p:599,img:'pizza.jpg',tag:'+ крылья 🎁'},
- {id:'z2',c:'pizza',n:'4 сыра',d:'Моцарелла, дор блю, чеддер и пармезан',p:649,img:'wings_pizza.jpg',tag:'+ крылья 🎁'},
- {id:'z3',c:'pizza',n:'Гавайская',d:'Сочная курица и сладкий ананас',p:599,img:'pizza.jpg',tag:'+ крылья 🎁'},
- {id:'z4',c:'pizza',n:'Охотничья',d:'Колбаски, бекон и щедрая начинка',p:649,img:'wings_pizza.jpg',tag:'+ крылья 🎁'},
- {id:'g1',c:'grill',n:'Рёбра гриль',d:'С шампиньонами, томатами, картофельными дольками и красным луком',p:950,w:'500 г',real:true,img:'coals.jpg'},
- {id:'g2',c:'grill',n:'Набор из курицы',d:'Шашлык из бедра, фри, огурец, томат, маринованный лук, лаваш',p:650,w:'460 г',real:true,img:'chicken_set.jpg'},
- {id:'n1',c:'snacks',n:'Крылья острые BBQ',d:'Хрустящие, в остром соусе барбекю',p:349,img:'wings_pizza.jpg'},
- {id:'n2',c:'snacks',n:'Куриные шарики с сыром',d:'Нежная курица и сырная начинка',p:249,img:'cheese_balls.jpg'},
- {id:'n3',c:'snacks',n:'Картофельные дольки',d:'Золотистые, со специями',p:179,img:'chef_combo.jpg'},
- {id:'n4',c:'snacks',n:'Мини хот-дог',d:'Идеальный перекус',p:150,real:true,img:'burger_hotdog.jpg'},
- {id:'c1',c:'combo',n:'Мини-комбо',d:'Мини-шаурма, картофель фри и маленький напиток',p:350,real:true,img:'chef_combo.jpg',tag:'Выгодно'},
- {id:'c2',c:'combo',n:'Комбо с мини-чикенбургером',d:'Чикенбургер, наггетсы и холодный напиток',p:390,img:'eat.jpg'}
-];
 const S={get(k,d){try{return JSON.parse(localStorage.getItem(k))??d}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
 let cart=S.get('eg_cart',{}), cat='shawa', stage='cart';
+// настройки из демо-админки (admin.html): стоп-лист, свои цены/названия/фото, районы, пауза
+const CFG=S.get('eg_cfg',{});
+for(const m of MENU){const o=(CFG.items||{})[m.id];if(o){if(o.p)m.p=o.p;if(o.n)m.n=o.n;if(o.d)m.d=o.d;if(o.img)m.src=o.img;m.off=!!o.off}}
+const pic=m=>m.src||`img/${m.img}`;
 const rub=n=>n.toLocaleString('ru-RU')+' ₽';
 const byId=id=>MENU.find(m=>m.id===id);
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 function tabs(){document.getElementById('tabs').innerHTML=CATS.map(([k,t])=>`<button class="tab${k===cat?' on':''}" data-c="${k}" type="button">${t}</button>`).join('')}
 function grid(){
   document.getElementById('grid').innerHTML=MENU.filter(m=>m.c===cat).map(m=>`
-   <div class="item"><img src="img/${m.img}" alt="${esc(m.n)}" loading="lazy"><div class="b">
+   <div class="item"><img src="${pic(m)}" alt="${esc(m.n)}" loading="lazy"><div class="b">
     ${m.tag?`<span class="tag">${esc(m.tag)}</span>`:''}<h4>${esc(m.n)}</h4><p>${esc(m.d)}</p>
     <div class="row"><span class="pr">${rub(m.p)}${m.w?`<small>${m.w}</small>`:''}</span>
-    <button class="add${cart[m.id]?' in':''}" data-add="${m.id}" type="button">${cart[m.id]?'В корзине · '+cart[m.id]:'+ В корзину'}</button></div></div></div>`).join('');
+    ${m.off?'<button class="add" type="button" disabled style="opacity:.45">Нет в наличии</button>':`<button class="add${cart[m.id]?' in':''}" data-add="${m.id}" type="button">${cart[m.id]?'В корзине · '+cart[m.id]:'+ В корзину'}</button>`}</div></div></div>`).join('');
 }
 const total=()=>Object.entries(cart).reduce((s,[id,q])=>s+byId(id).p*q,0);
 const count=()=>Object.values(cart).reduce((a,b)=>a+b,0);
@@ -389,7 +371,7 @@ function drawer(){
   const body=document.getElementById('dbody'),foot=document.getElementById('dfoot'),ids=Object.keys(cart);
   if(stage==='done')return;
   if(!ids.length){body.innerHTML='<p class="empty">Корзина пуста.<br>Добавьте что-нибудь вкусное 🔥</p>';foot.innerHTML='';return}
-  const list=ids.map(id=>{const m=byId(id);return `<div class="ci"><img src="img/${m.img}" alt=""><div class="t">${esc(m.n)}<small>${rub(m.p)}</small></div>
+  const list=ids.map(id=>{const m=byId(id);return `<div class="ci"><img src="${pic(m)}" alt=""><div class="t">${esc(m.n)}<small>${m.off?'<span style="color:#ff8a80">нет в наличии, уберите</span>':rub(m.p)}</small></div>
    <div class="qty"><button data-q="${id}" data-d="-1" type="button">−</button><b>${cart[id]}</b><button data-q="${id}" data-d="1" type="button">+</button></div></div>`}).join('');
   const gq=giftQty();
   const gift=gq?`<div class="ci"><img src="img/wings_pizza.jpg" alt=""><div class="t">Крылья острые BBQ<small style="color:var(--fire)">🎁 подарок к пицце · <s>${rub(byId('n1').p)}</s> 0 ₽</small></div><div class="qty"><b>${gq}</b></div></div>`:'';
@@ -397,10 +379,10 @@ function drawer(){
     body.innerHTML=list+gift;
     foot.innerHTML=`<div class="sum"><span>Итого</span><span>${rub(total())}</span></div><button class="btn" id="toForm" type="button">Оформить заказ</button>`;
   }else{
-    const dl=F.way==='Доставка', z=ZONES[F.zone], fee=deliveryFee(), sub=total(), short=dl&&sub<MIN_ORDER;
+    const dl=F.way==='Доставка', z=ZONES[F.zone], fee=deliveryFee(), sub=total(), MIN_ORDER=dl?(ZONES[F.zone].min||0):0, short=dl&&sub<MIN_ORDER;
     body.innerHTML=`${list}${gift}
      <div class="seg"><label><input type="radio" name="way" value="Доставка" ${dl?'checked':''}><span>🛵 Доставка</span></label><label><input type="radio" name="way" value="Самовывоз" ${dl?'':'checked'}><span>🏃 Самовывоз</span></label></div>
-     ${dl?`<div class="f"><label for="oZone">Район доставки</label><select id="oZone">${ZONES.map((x,i)=>`<option value="${i}" ${i==F.zone?'selected':''}>${x.n} · ${x.p} ₽</option>`).join('')}</select></div>
+     ${dl?`<div class="f"><label for="oZone">Район доставки</label><select id="oZone">${ZONES.map((x,i)=>`<option value="${i}" ${i==F.zone?'selected':''}>${esc(x.n)} · ${x.p} ₽${x.min?' · от '+x.min+' ₽':''}</option>`).join('')}</select></div>
      <div class="f"><label for="oStreet">Улица и дом *</label><input id="oStreet" value="${esc(F.street)}" autocomplete="street-address" placeholder="Например: Ленина, 5"></div>
      <div class="addr4"><div class="f"><label>Подъезд</label><input id="oEnt" inputmode="numeric" value="${esc(F.ent)}"></div><div class="f"><label>Этаж</label><input id="oFloor" inputmode="numeric" value="${esc(F.floor)}"></div><div class="f"><label>Кв./офис</label><input id="oFlat" value="${esc(F.flat)}"></div><div class="f"><label>Домофон</label><input id="oDoor" value="${esc(F.door)}"></div></div>`
      :`<p class="note2">📍 Заберёте сами: Пионерская, 28а, ТЦ «Орбита»</p>`}
@@ -416,13 +398,14 @@ function drawer(){
     foot.innerHTML=`${dl?`<div class="sumr"><span>Еда</span><span>${rub(sub)}</span></div><div class="sumr"><span>Доставка · ${esc(z.n)}</span><span>${fee?rub(fee):'бесплатно 🎉'}</span></div>${!fee||sub>=FREE_FROM?'':`<div class="sumr hintr"><span>До бесплатной доставки</span><span>${rub(FREE_FROM-sub)}</span></div>`}`:''}
      <div class="sum"><span>Итого</span><span>${rub(sub+fee)}</span></div>
      ${short?`<p class="err" style="display:block;margin:-4px 0 10px">Минимальная сумма доставки ${rub(MIN_ORDER)}, добавьте ещё на ${rub(MIN_ORDER-sub)}</p>`:''}
-     <button class="btn" id="send" type="button" ${short?'disabled style="opacity:.5"':''}>Отправить заказ</button><p class="ex" style="display:block;text-align:center;margin-top:8px">Районы, цены доставки и минималка в демо — пример</p>`;
+     ${PAUSED?'<p class="err" style="display:block;margin:-4px 0 10px">Сейчас заказы временно не принимаются, позвоните: +7 922 442-24-44</p>':''}${ids.some(id=>byId(id).off)?'<p class="err" style="display:block;margin:-4px 0 10px">Уберите позиции, которых нет в наличии</p>':''}<button class="btn" id="send" type="button" ${short||PAUSED||ids.some(id=>byId(id).off)?'disabled style="opacity:.5"':''}>Отправить заказ</button><p class="ex" style="display:block;text-align:center;margin-top:8px">Районы, цены доставки и минималка в демо — пример</p>`;
   }
 }
 // ── доставка (значения-пример, в рабочей версии меняются в админке) ──
-const ZONES=[{n:'Центр, 1–4 мкр',p:150,eta:45},{n:'5–14 мкр',p:200,eta:55},{n:'Частный сектор, окраины',p:300,eta:70}];
-const MIN_ORDER=600, FREE_FROM=2000;
+const ZONES=CFG.zones&&CFG.zones.length?CFG.zones:[{n:'Центр, 1–4 мкр',p:150,min:600,eta:45},{n:'5–14 мкр',p:200,min:800,eta:55},{n:'Частный сектор, окраины',p:300,min:1200,eta:70}];
+const FREE_FROM=CFG.freeFrom||2000, PAUSED=!!CFG.paused;
 let F={way:'Доставка',zone:0,street:'',ent:'',floor:'',flat:'',door:'',when:'asap',time:'',name:'',phone:'',pay:'Наличными',change:'1000 ₽',note:''};
+if(F.zone>=ZONES.length)F.zone=0;
 const deliveryFee=()=>F.way!=='Доставка'||total()>=FREE_FROM?0:ZONES[F.zone].p;
 function slots(){const r=[],n=new Date(),end=[5,6].includes(n.getDay())?26:24;let t=new Date(n.getTime()+70*60e3);t.setMinutes(t.getMinutes()<30?30:60,0,0);
   while(t.getHours()+(t.getDate()!==n.getDate()?24:0)<end&&r.length<14){r.push(t.toTimeString().slice(0,5));t=new Date(t.getTime()+30*60e3)}return r}
@@ -437,7 +420,7 @@ document.addEventListener('click',e=>{
   const t=e.target.closest('[data-c],[data-add],[data-q],[data-open-cart],[data-tab],[data-slot],#toForm,#send,#again,#openFlow');if(!t)return;
   if(t.dataset.c){cat=t.dataset.c;tabs();grid()}
   else if(t.dataset.tab){cat=t.dataset.tab;tabs();grid()}
-  else if(t.dataset.add){cart[t.dataset.add]=(cart[t.dataset.add]||0)+1;save()}
+  else if(t.dataset.add){if(byId(t.dataset.add).off)return;cart[t.dataset.add]=(cart[t.dataset.add]||0)+1;save()}
   else if(t.dataset.q){const id=t.dataset.q;cart[id]=(cart[id]||0)+ +t.dataset.d;if(cart[id]<=0)delete cart[id];save()}
   else if(t.hasAttribute('data-open-cart'))openCart();
   else if(t.id==='toForm'){stage='form';drawer()}
