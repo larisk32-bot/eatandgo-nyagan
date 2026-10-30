@@ -172,6 +172,15 @@ footer .wrap{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap}
 }
 @media (prefers-reduced-motion:reduce){.rv{opacity:1;transform:none;transition:none}}
 /* доставка в корзине */
+.ac{position:relative}
+.sug{position:absolute;left:0;right:0;top:100%;z-index:20;list-style:none;background:var(--bg3);border:1px solid var(--line);border-radius:12px;margin-top:4px;overflow:hidden;display:none;box-shadow:0 14px 30px rgba(0,0,0,.5)}
+.sug.on{display:block}
+.sug li{padding:10px 14px;font-size:15px;cursor:pointer;border-bottom:1px solid var(--line)}
+.sug li:last-child{border:0}
+.sug li:hover,.sug li.act{background:#2b2f29}
+.sug li small{display:block;color:var(--muted);font-size:12px}
+.route{margin-top:10px}
+.route iframe{width:100%;height:200px;border:0;border-radius:14px;background:#222}
 .addr4{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
 .addr4 .f{margin-top:10px}
 .addr4 input{padding:10px 8px;text-align:center}
@@ -383,7 +392,8 @@ function drawer(){
     body.innerHTML=`${list}${gift}
      <div class="seg"><label><input type="radio" name="way" value="Доставка" ${dl?'checked':''}><span>🛵 Доставка</span></label><label><input type="radio" name="way" value="Самовывоз" ${dl?'':'checked'}><span>🏃 Самовывоз</span></label></div>
      ${dl?`<div class="f"><label for="oZone">Район доставки</label><select id="oZone">${ZONES.map((x,i)=>`<option value="${i}" ${i==F.zone?'selected':''}>${esc(x.n)} · ${x.p} ₽${x.min?' · от '+x.min+' ₽':''}</option>`).join('')}</select></div>
-     <div class="f"><label for="oStreet">Улица и дом *</label><input id="oStreet" value="${esc(F.street)}" autocomplete="street-address" placeholder="Например: Ленина, 5"></div>
+     <div class="f ac"><label for="oStreet">Улица и дом *</label><input id="oStreet" value="${esc(F.street)}" autocomplete="off" placeholder="Начните вводить: Ленина 5"><ul class="sug" id="sugSt"></ul></div>
+     ${F.coords?`<div class="route"><iframe title="Маршрут курьера" loading="lazy" src="https://yandex.ru/map-widget/v1/?rtext=${SHOP[0]},${SHOP[1]}~${F.coords[0]},${F.coords[1]}&rtt=auto"></iframe><p class="note2" id="routeInfo">${esc(F.routeInfo||'Считаем расстояние…')}</p></div>`:''}
      <div class="addr4"><div class="f"><label>Подъезд</label><input id="oEnt" inputmode="numeric" value="${esc(F.ent)}"></div><div class="f"><label>Этаж</label><input id="oFloor" inputmode="numeric" value="${esc(F.floor)}"></div><div class="f"><label>Кв./офис</label><input id="oFlat" value="${esc(F.flat)}"></div><div class="f"><label>Домофон</label><input id="oDoor" value="${esc(F.door)}"></div></div>`
      :`<p class="note2">📍 Заберёте сами: Пионерская, 28а, ТЦ «Орбита»</p>`}
      <div class="lbl2">Когда</div>
@@ -404,9 +414,36 @@ function drawer(){
 // ── доставка (значения-пример, в рабочей версии меняются в админке) ──
 const ZONES=CFG.zones&&CFG.zones.length?CFG.zones:[{n:'Центр, 1–4 мкр',p:150,min:600,eta:45},{n:'5–14 мкр',p:200,min:800,eta:55},{n:'Частный сектор, окраины',p:300,min:1200,eta:70}];
 const FREE_FROM=CFG.freeFrom||2000, PAUSED=!!CFG.paused;
-let F={way:'Доставка',zone:0,street:'',ent:'',floor:'',flat:'',door:'',when:'asap',time:'',name:'',phone:'',pay:'Наличными',change:'1000 ₽',note:''};
+let F={coords:null,routeInfo:'',way:'Доставка',zone:0,street:'',ent:'',floor:'',flat:'',door:'',when:'asap',time:'',name:'',phone:'',pay:'Наличными',change:'1000 ₽',note:''};
 if(F.zone>=ZONES.length)F.zone=0;
 const deliveryFee=()=>F.way!=='Доставка'||total()>=FREE_FROM?0:ZONES[F.zone].p;
+
+// ── подсказки адреса доставки (OpenStreetMap/Photon) и маршрут от заведения (виджет Яндекс Карт + OSRM) ──
+// в рабочей версии — DaData или Геосаджест Яндекса с ключом заказчика
+const SHOP=[62.15387,65.45747]; // ТЦ «Орбита», Пионерская 28а
+let stTmr=null, stItems=[], stAct=-1;
+const stClose=()=>{const u=document.getElementById('sugSt');if(u)u.classList.remove('on');stAct=-1};
+document.addEventListener('input',e=>{if(e.target.id!=='oStreet')return;F.street=e.target.value;if(F.coords){F.coords=null;F.routeInfo=''}
+  clearTimeout(stTmr);const q=e.target.value.trim();if(q.length<3){stClose();return}
+  stTmr=setTimeout(async()=>{try{const d=await (await fetch(`https://photon.komoot.io/api/?q=${encodeURIComponent(q+' Нягань')}&limit=12&lat=${SHOP[0]}&lon=${SHOP[1]}&layer=house&layer=street`)).json();
+    const seen=new Set();stItems=d.features.filter(f=>f.properties.city==='Нягань').map(f=>{const pp=f.properties;
+      const t=pp.type==='street'?pp.name:`${(pp.street||pp.name||'').replace(/^улица /,'')}${pp.housenumber?', '+pp.housenumber:''}`;return {t,c:[f.geometry.coordinates[1],f.geometry.coordinates[0]],street:pp.type==='street'}})
+      .filter(x=>x.t&&!seen.has(x.t)&&seen.add(x.t)).slice(0,6);
+    const u=document.getElementById('sugSt');if(!u)return;
+    u.innerHTML=stItems.length?stItems.map((x,i)=>`<li data-si="${i}">${esc(x.t)}<small>${x.street?'улица, допишите номер дома':'Нягань'}</small></li>`).join(''):'<li style="cursor:default;color:var(--muted)">Не нашли, впишите как есть</li>';u.classList.add('on')}catch(err){stClose()}},300)});
+document.addEventListener('mousedown',e=>{const li=e.target.closest('#sugSt li[data-si]');if(!li)return;e.preventDefault();const x=stItems[+li.dataset.si];
+  readForm();F.street=x.street?x.t+', ':x.t;stClose();
+  if(x.street){drawer();const i=document.getElementById('oStreet');i.focus();i.setSelectionRange(i.value.length,i.value.length);return}
+  F.coords=x.c;F.routeInfo='';drawer();routeDist()});
+document.addEventListener('keydown',e=>{if(e.target.id!=='oStreet')return;const u=document.getElementById('sugSt'),lis=u?[...u.querySelectorAll('li[data-si]')]:[];if(!lis.length||!u.classList.contains('on'))return;
+  if(e.key==='ArrowDown'||e.key==='ArrowUp'){e.preventDefault();stAct=(stAct+(e.key==='ArrowDown'?1:-1)+lis.length)%lis.length;lis.forEach((l,i)=>l.classList.toggle('act',i===stAct))}
+  else if(e.key==='Enter'&&stAct>=0){e.preventDefault();lis[stAct].dispatchEvent(new MouseEvent('mousedown',{bubbles:true}))}else if(e.key==='Escape')stClose()});
+document.addEventListener('focusout',e=>{if(e.target.id==='oStreet')setTimeout(stClose,150)});
+async function routeDist(){const c=F.coords;if(!c)return;
+  try{const r=await (await fetch(`https://router.project-osrm.org/route/v1/driving/${SHOP[1]},${SHOP[0]};${c[1]},${c[0]}?overview=false`)).json();if(F.coords!==c)return;
+    const km=r.routes[0].distance/1000,min=Math.max(3,Math.round(r.routes[0].duration/60));
+    F.routeInfo=`🛵 От нас ≈ ${km<10?km.toFixed(1).replace('.',','):Math.round(km)} км, курьеру ~${min} мин в пути`}catch(err){F.routeInfo='Маршрут на карте выше'}
+  const el=document.getElementById('routeInfo');if(el)el.textContent=F.routeInfo}
 function slots(){const r=[],n=new Date(),end=[5,6].includes(n.getDay())?26:24;let t=new Date(n.getTime()+70*60e3);t.setMinutes(t.getMinutes()<30?30:60,0,0);
   while(t.getHours()+(t.getDate()!==n.getDate()?24:0)<end&&r.length<14){r.push(t.toTimeString().slice(0,5));t=new Date(t.getTime()+30*60e3)}return r}
 function readForm(){const v=id=>{const e=document.getElementById(id);return e?e.value:undefined};
@@ -479,7 +516,7 @@ document.getElementById('flow').addEventListener('click',e=>{
   else if(a==='hand'){dropKb('shop');addMsg('shop',`№${FO.no} передан курьеру Алексею`,null,true);
     const q=encodeURIComponent('Нягань, '+FO.street);
     addMsg('courier',`🛵 <b>Новая доставка №${FO.no}</b> к ${FO.eta||'—'}\n📍 ${esc(FO.street)}${FO.ent?', под. '+esc(FO.ent):''}${FO.floor?', эт. '+esc(FO.floor):''}${FO.flat?', кв. '+esc(FO.flat):''}${FO.door?', домофон '+esc(FO.door):''}\n👤 ${esc(FO.name)}, ${esc(FO.phone)}\n💰 <b>${rub(FO.total)}</b> · ${esc(FO.pay)}${FO.pay==='Наличными'&&FO.change!=='Без сдачи'?', <b>сдача с '+FO.change+'</b>':''}`+(FO.note?`\n💬 ${esc(FO.note)}`:''),
-      `<a href="https://yandex.ru/maps/?text=${q}" target="_blank" rel="noopener">📍 Маршрут</a><a href="tel:${esc(FO.phone.replace(/[^\d+]/g,''))}">📞 Позвонить</a><button data-fa="took">✅ Взял, выезжаю</button>`)}
+      `<a href="https://yandex.ru/maps/?rtext=${SHOP[0]},${SHOP[1]}~${FO.coords?FO.coords.join(','):q}&rtt=auto" target="_blank" rel="noopener">📍 Маршрут</a><a href="tel:${esc(FO.phone.replace(/[^\d+]/g,''))}">📞 Позвонить</a><button data-fa="took">✅ Взял, выезжаю</button>`)}
   else if(a==='took'){dropKb('courier');addMsg('courier',`В пути с №${FO.no}`,`<button data-fa="deliv">🏁 Доставил</button>`);
     addMsg('shop',`🛵 Алексей выехал с №${FO.no}`,null,true);addMsg('client','🛵 Курьер Алексей уже едет к вам! Будет минут через 15.')}
   else if(a==='deliv'){dropKb('courier');addMsg('courier',`№${FO.no} доставлен ✔ ${FO.pay==='Наличными'?'(принято '+rub(FO.total)+' наличными)':''}`,null,true);
