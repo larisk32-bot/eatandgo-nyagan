@@ -171,6 +171,47 @@ footer .wrap{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap}
   .tabs{top:66px}
 }
 @media (prefers-reduced-motion:reduce){.rv{opacity:1;transform:none;transition:none}}
+/* доставка в корзине */
+.addr4{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.addr4 .f{margin-top:10px}
+.addr4 input{padding:10px 8px;text-align:center}
+.lbl2{font:800 12px/1 Manrope;letter-spacing:.14em;text-transform:uppercase;color:var(--lime);margin:18px 0 -4px}
+.note2{color:var(--muted);font-size:14px;margin-top:10px}
+.ex{display:inline-block;font:800 10px/1 Manrope;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);border:1px solid var(--line);border-radius:6px;padding:3px 6px;vertical-align:middle}
+.hint2{color:var(--muted);font-size:12px}
+.slots2{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.slot2{border:1px solid var(--line);background:var(--bg);border-radius:10px;padding:8px 10px;font-weight:800;font-size:14px;color:var(--muted)}
+.slot2.on{background:var(--lime);border-color:var(--lime);color:#0e0f0d}
+.sumr{display:flex;justify-content:space-between;font-size:15px;color:var(--muted);margin-bottom:4px}
+.sumr.hintr{color:var(--fire);font-weight:800}
+
+/* демонстрация обработки заказа: три «чата Telegram» */
+.flow{position:fixed;inset:0;z-index:60;background:#0b0f14;display:none;flex-direction:column;padding:0}
+.flow.on{display:flex}
+.fh{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 16px;background:#111821;border-bottom:1px solid #1f2a36}
+.fh b{font:700 19px/1.2 Oswald;text-transform:uppercase;color:#fff}
+.fh small{display:block;color:#7d8b99;font:600 12px Manrope;text-transform:none}
+.ftabs{display:none;gap:6px;padding:8px 10px;background:#111821;border-bottom:1px solid #1f2a36}
+.ftab{flex:1;position:relative;background:#17212b;border:0;border-radius:10px;padding:10px 4px;color:#9fb0c0;font:800 13px Manrope}
+.ftab.on{background:#2b5278;color:#fff}
+.ftab i{position:absolute;top:6px;right:8px;width:9px;height:9px;border-radius:50%;background:var(--red);display:none}
+.ftab.ping i{display:block}
+.fcols{flex:1;display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:#1f2a36;min-height:0}
+.chat{display:flex;flex-direction:column;background:#0e1621;min-height:0}
+.ch{display:flex;align-items:center;gap:10px;padding:10px 14px;background:#17212b}
+.ch .av{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;font-size:19px;flex:none}
+.ch b{color:#fff;font:800 15px Manrope;display:block}
+.ch small{color:#7d8b99;font:600 12px Manrope}
+.cb{flex:1;overflow:auto;padding:12px 10px 18px;display:flex;flex-direction:column;gap:8px}
+.mg{max-width:92%;background:#182533;color:#e9eef3;border-radius:14px 14px 14px 4px;padding:9px 12px;font:500 14px/1.45 Manrope;white-space:pre-line;animation:pop .25s ease}
+.mg .tm{display:block;text-align:right;color:#6d8296;font-size:11px;margin-top:2px}
+.mg.sys{align-self:center;background:#1c2733;color:#9fb0c0;border-radius:999px;font-size:12px;padding:5px 12px}
+.kb{display:grid;grid-template-columns:repeat(auto-fit,minmax(90px,1fr));gap:4px;max-width:92%;margin-top:-4px}
+.kb button,.kb a{background:#2b5278;color:#fff;border:0;border-radius:8px;padding:9px 6px;font:700 13px Manrope;text-align:center;text-decoration:none}
+.kb button:hover,.kb a:hover{background:#3a6a99}
+.cfoot{padding:8px 12px;background:#17212b;color:#5f7183;font:600 12px Manrope;text-align:center}
+@keyframes pop{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+@media (max-width:900px){.ftabs{display:flex}.fcols{display:block}.chat{display:none;height:100%}.chat.on{display:flex}}
 </style>
 </head>
 <body>
@@ -288,6 +329,20 @@ footer .wrap{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap}
   <div class="dfoot" id="dfoot"></div>
 </aside>
 
+<section class="flow" id="flow" aria-label="Как обрабатывается заказ">
+  <div class="fh"><div><b>Как обработают ваш заказ</b><small>Демо: нажимайте кнопки в чатах, как это делали бы повар и курьер</small></div><button class="btn ghost" id="flowClose" type="button" style="padding:10px 14px;font-size:16px" aria-label="Закрыть">✕</button></div>
+  <div class="ftabs" id="ftabs">
+    <button class="ftab on" data-ft="shop" type="button">🧑‍🍳 Заведение<i></i></button>
+    <button class="ftab" data-ft="courier" type="button">🛵 Курьер<i></i></button>
+    <button class="ftab" data-ft="client" type="button">🙋 Покупатель<i></i></button>
+  </div>
+  <div class="fcols">
+    <div class="chat on" id="c-shop"><div class="ch"><span class="av" style="background:var(--lime)">🍔</span><div><b>EATandGO · Заказы</b><small>чат заведения в Telegram</small></div></div><div class="cb"></div><div class="cfoot">Заказы падают сюда сами, с кнопками</div></div>
+    <div class="chat" id="c-courier"><div class="ch"><span class="av" style="background:#ff8a1f">🛵</span><div><b>EATandGO · Курьер Алексей</b><small>чат курьера в Telegram</small></div></div><div class="cb"></div><div class="cfoot">Курьер видит адрес, сумму и сдачу</div></div>
+    <div class="chat" id="c-client"><div class="ch"><span class="av" style="background:#2aabee">🙋</span><div><b>EATandGO</b><small>бот у покупателя в Telegram</small></div></div><div class="cb"></div><div class="cfoot">Покупатель видит каждый шаг</div></div>
+  </div>
+</section>
+
 <script>
 const CATS=[['shawa','Шаурма'],['burgers','Бургеры'],['pizza','Пицца'],['grill','Гриль'],['snacks','Закуски'],['combo','Комбо']];
 // p: цены из постов группы отмечены real:true, остальные — примерные для демо
@@ -342,22 +397,44 @@ function drawer(){
     body.innerHTML=list+gift;
     foot.innerHTML=`<div class="sum"><span>Итого</span><span>${rub(total())}</span></div><button class="btn" id="toForm" type="button">Оформить заказ</button>`;
   }else{
+    const dl=F.way==='Доставка', z=ZONES[F.zone], fee=deliveryFee(), sub=total(), short=dl&&sub<MIN_ORDER;
     body.innerHTML=`${list}${gift}
-     <div class="seg"><label><input type="radio" name="way" value="Доставка" checked><span>Доставка</span></label><label><input type="radio" name="way" value="Самовывоз"><span>Самовывоз</span></label></div>
-     <div class="f"><label for="oName">Имя *</label><input id="oName" autocomplete="name"></div>
-     <div class="f"><label for="oPhone">Телефон *</label><input id="oPhone" type="tel" autocomplete="tel" placeholder="+7 ___ ___-__-__"></div>
-     <div class="f" id="addrBox"><label for="oAddr">Адрес доставки *</label><input id="oAddr" autocomplete="street-address" placeholder="Улица, дом, подъезд, квартира"></div>
-     <div class="f"><label for="oPay">Оплата</label><select id="oPay"><option>Картой курьеру</option><option>Наличными</option><option>Переводом</option></select></div>
-     <div class="f"><label for="oNote">Комментарий</label><textarea id="oNote" rows="2" placeholder="Например: без лука, позвонить заранее"></textarea></div>
-     <p class="err" id="oErr">Заполните имя, телефон и адрес</p>`;
-    foot.innerHTML=`<div class="sum"><span>Итого</span><span>${rub(total())}</span></div><button class="btn" id="send" type="button">Отправить заказ</button>`;
-    body.querySelectorAll('input[name=way]').forEach(r=>r.onchange=()=>document.getElementById('addrBox').style.display=r.value==='Самовывоз'&&r.checked?'none':'flex');
+     <div class="seg"><label><input type="radio" name="way" value="Доставка" ${dl?'checked':''}><span>🛵 Доставка</span></label><label><input type="radio" name="way" value="Самовывоз" ${dl?'':'checked'}><span>🏃 Самовывоз</span></label></div>
+     ${dl?`<div class="f"><label for="oZone">Район доставки</label><select id="oZone">${ZONES.map((x,i)=>`<option value="${i}" ${i==F.zone?'selected':''}>${x.n} · ${x.p} ₽</option>`).join('')}</select></div>
+     <div class="f"><label for="oStreet">Улица и дом *</label><input id="oStreet" value="${esc(F.street)}" autocomplete="street-address" placeholder="Например: Ленина, 5"></div>
+     <div class="addr4"><div class="f"><label>Подъезд</label><input id="oEnt" inputmode="numeric" value="${esc(F.ent)}"></div><div class="f"><label>Этаж</label><input id="oFloor" inputmode="numeric" value="${esc(F.floor)}"></div><div class="f"><label>Кв./офис</label><input id="oFlat" value="${esc(F.flat)}"></div><div class="f"><label>Домофон</label><input id="oDoor" value="${esc(F.door)}"></div></div>`
+     :`<p class="note2">📍 Заберёте сами: Пионерская, 28а, ТЦ «Орбита»</p>`}
+     <div class="lbl2">Когда</div>
+     <div class="seg"><label><input type="radio" name="when" value="asap" ${F.when==='asap'?'checked':''}><span>⚡ Как можно скорее</span></label><label><input type="radio" name="when" value="time" ${F.when==='time'?'checked':''}><span>🕐 Ко времени</span></label></div>
+     ${F.when==='time'?`<div class="slots2">${slots().map(t=>`<button class="slot2${F.time===t?' on':''}" data-slot="${t}" type="button">${t}</button>`).join('')}</div>`:`<p class="note2">${dl?'Обычно привозим за 45–60 минут':'Будет готово через 20–30 минут'} <span class="ex">пример</span></p>`}
+     <div class="f"><label for="oName">Имя *</label><input id="oName" value="${esc(F.name)}" autocomplete="name"></div>
+     <div class="f"><label for="oPhone">Телефон *</label><input id="oPhone" value="${esc(F.phone)}" type="tel" autocomplete="tel" placeholder="+7 ___ ___-__-__"><small class="hint2">В рабочей версии номер передаётся одной кнопкой «📱 Поделиться» в Telegram-боте</small></div>
+     <div class="f"><label for="oPay">Оплата</label><select id="oPay">${['Наличными','Картой курьеру','Переводом'].map(x=>`<option ${F.pay===x?'selected':''}>${x}</option>`).join('')}</select></div>
+     ${F.pay==='Наличными'?`<div class="f"><label for="oChange">Сдача с</label><select id="oChange">${['Без сдачи','500 ₽','1000 ₽','2000 ₽','5000 ₽'].map(x=>`<option ${F.change===x?'selected':''}>${x}</option>`).join('')}</select></div>`:''}
+     <div class="f"><label for="oNote">Комментарий</label><textarea id="oNote" rows="2" placeholder="Например: без лука, позвонить за 5 минут">${esc(F.note)}</textarea></div>
+     <p class="err" id="oErr"></p>`;
+    foot.innerHTML=`${dl?`<div class="sumr"><span>Еда</span><span>${rub(sub)}</span></div><div class="sumr"><span>Доставка · ${esc(z.n)}</span><span>${fee?rub(fee):'бесплатно 🎉'}</span></div>${!fee||sub>=FREE_FROM?'':`<div class="sumr hintr"><span>До бесплатной доставки</span><span>${rub(FREE_FROM-sub)}</span></div>`}`:''}
+     <div class="sum"><span>Итого</span><span>${rub(sub+fee)}</span></div>
+     ${short?`<p class="err" style="display:block;margin:-4px 0 10px">Минимальная сумма доставки ${rub(MIN_ORDER)}, добавьте ещё на ${rub(MIN_ORDER-sub)}</p>`:''}
+     <button class="btn" id="send" type="button" ${short?'disabled style="opacity:.5"':''}>Отправить заказ</button><p class="ex" style="display:block;text-align:center;margin-top:8px">Районы, цены доставки и минималка в демо — пример</p>`;
   }
 }
+// ── доставка (значения-пример, в рабочей версии меняются в админке) ──
+const ZONES=[{n:'Центр, 1–4 мкр',p:150,eta:45},{n:'5–14 мкр',p:200,eta:55},{n:'Частный сектор, окраины',p:300,eta:70}];
+const MIN_ORDER=600, FREE_FROM=2000;
+let F={way:'Доставка',zone:0,street:'',ent:'',floor:'',flat:'',door:'',when:'asap',time:'',name:'',phone:'',pay:'Наличными',change:'1000 ₽',note:''};
+const deliveryFee=()=>F.way!=='Доставка'||total()>=FREE_FROM?0:ZONES[F.zone].p;
+function slots(){const r=[],n=new Date(),end=[5,6].includes(n.getDay())?26:24;let t=new Date(n.getTime()+70*60e3);t.setMinutes(t.getMinutes()<30?30:60,0,0);
+  while(t.getHours()+(t.getDate()!==n.getDate()?24:0)<end&&r.length<14){r.push(t.toTimeString().slice(0,5));t=new Date(t.getTime()+30*60e3)}return r}
+function readForm(){const v=id=>{const e=document.getElementById(id);return e?e.value:undefined};
+  for(const [k,id] of [['street','oStreet'],['ent','oEnt'],['floor','oFloor'],['flat','oFlat'],['door','oDoor'],['name','oName'],['phone','oPhone'],['pay','oPay'],['change','oChange'],['note','oNote']]){const x=v(id);if(x!==undefined)F[k]=x}
+  const z=v('oZone');if(z!==undefined)F.zone=+z}
+document.addEventListener('change',e=>{if(!e.target.closest('#dbody'))return;readForm();
+  if(e.target.name==='way'){F.way=e.target.value;drawer()}else if(e.target.name==='when'){F.when=e.target.value;drawer()}else if(['oZone','oPay'].includes(e.target.id))drawer()});
 function openCart(){document.getElementById('shade').classList.add('on');document.getElementById('drawer').classList.add('on');if(stage==='done'){stage='cart'}drawer()}
 function closeCart(){document.getElementById('shade').classList.remove('on');document.getElementById('drawer').classList.remove('on')}
 document.addEventListener('click',e=>{
-  const t=e.target.closest('[data-c],[data-add],[data-q],[data-open-cart],[data-tab],#toForm,#send,#again');if(!t)return;
+  const t=e.target.closest('[data-c],[data-add],[data-q],[data-open-cart],[data-tab],[data-slot],#toForm,#send,#again,#openFlow');if(!t)return;
   if(t.dataset.c){cat=t.dataset.c;tabs();grid()}
   else if(t.dataset.tab){cat=t.dataset.tab;tabs();grid()}
   else if(t.dataset.add){cart[t.dataset.add]=(cart[t.dataset.add]||0)+1;save()}
@@ -365,20 +442,69 @@ document.addEventListener('click',e=>{
   else if(t.hasAttribute('data-open-cart'))openCart();
   else if(t.id==='toForm'){stage='form';drawer()}
   else if(t.id==='again'){stage='cart';drawer()}
+  else if(t.dataset.slot){readForm();F.time=t.dataset.slot;drawer()}
   else if(t.id==='send'){
-    const v=id=>(document.getElementById(id)||{value:''}).value.trim();
-    const way=document.querySelector('input[name=way]:checked').value;
-    const ok=v('oName')&&v('oPhone').replace(/\D/g,'').length>=10&&(way==='Самовывоз'||v('oAddr'));
-    document.getElementById('oErr').style.display=ok?'none':'block';if(!ok)return;
-    const no=Math.floor(100+Math.random()*900);
-    const lines=Object.entries(cart).map(([id,q])=>`• ${byId(id).n} × ${q} — ${rub(byId(id).p*q)}`).join('\n');
-    const gift=giftQty()?`\n• 🎁 Крылья острые BBQ × ${giftQty()} — 0 ₽ (акция «пицца + крылья»)`:'';
-    const msg=`🆕 Заказ №${no}\n${lines}${gift}\nИтого: ${rub(total())}\n${way}${way==='Доставка'?': '+v('oAddr'):''}\n${v('oName')}, ${v('oPhone')}\nОплата: ${v('oPay')}${v('oNote')?'\nКомментарий: '+v('oNote'):''}`;
+    readForm();const dl=F.way==='Доставка',err=document.getElementById('oErr');
+    const miss=!F.name.trim()?'Укажите имя':F.phone.replace(/\D/g,'').length<10?'Укажите телефон':dl&&!F.street.trim()?'Укажите улицу и дом':F.when==='time'&&!F.time?'Выберите время':'';
+    if(miss){err.textContent=miss;err.style.display='block';err.scrollIntoView({block:'center'});return}
+    const items=Object.entries(cart).map(([id,q])=>({n:byId(id).n,q,p:byId(id).p}));
+    if(giftQty())items.push({n:'🎁 Крылья острые BBQ (акция)',q:giftQty(),p:0});
+    const o={no:Math.floor(100+Math.random()*900),items,sub:total(),fee:deliveryFee(),...JSON.parse(JSON.stringify(F)),zoneName:ZONES[F.zone].n,eta:ZONES[F.zone].eta};
+    o.total=o.sub+o.fee;
     cart={};S.set('eg_cart',cart);document.querySelectorAll('.cnt').forEach(e=>e.textContent=0);grid();stage='done';
-    document.getElementById('dbody').innerHTML=`<div class="done"><h3>Заказ принят! 🔥</h3><p style="color:var(--muted)">Мы перезвоним для подтверждения.</p><p style="margin-top:16px;font-weight:800">Так заказ придёт в Telegram заведения:</p><pre>${esc(msg)}</pre><p style="color:var(--muted);font-size:13px;margin-top:12px">Демо: заказ никуда не отправлен.</p></div>`;
-    document.getElementById('dfoot').innerHTML='<button class="btn" id="again" type="button">Заказать ещё</button>';
+    document.getElementById('dbody').innerHTML=`<div class="done"><h3>Заказ №${o.no} отправлен! 🔥</h3><p style="color:var(--muted)">${dl?'Курьер привезёт на '+esc(o.street):'Ждём вас на Пионерской, 28а'}. Итого ${rub(o.total)}.</p>
+      <p style="margin-top:18px;font-weight:800">А теперь самое интересное 👇</p><button class="btn" type="button" id="openFlow" style="width:100%;margin-top:10px">Посмотреть, как заказ обработают</button>
+      <p style="color:var(--muted);font-size:13px;margin-top:12px">Демо: заказ никуда не отправлен, всё происходит на этом экране.</p></div>`;
+    document.getElementById('dfoot').innerHTML='<button class="btn ghost" id="again" type="button" style="width:100%">Заказать ещё</button>';
+    startFlow(o);
   }
+  else if(t.id==='openFlow'){closeCart();document.getElementById('flow').classList.add('on')}
 });
+// ── демо обработки заказа: заведение → курьер → покупатель ──
+let FO=null;
+const hm=d=>d.toTimeString().slice(0,5), now=()=>hm(new Date());
+function addMsg(chat,html,kb,sys){const cb=document.querySelector(`#c-${chat} .cb`);
+  const m=document.createElement('div');m.className='mg'+(sys?' sys':'');m.innerHTML=html+(sys?'':`<span class="tm">${now()}</span>`);cb.appendChild(m);
+  if(kb){const k=document.createElement('div');k.className='kb';k.innerHTML=kb;cb.appendChild(k)}
+  cb.scrollTop=cb.scrollHeight;
+  const tab=document.querySelector(`.ftab[data-ft="${chat}"]`);if(tab&&!tab.classList.contains('on'))tab.classList.add('ping')}
+const dropKb=chat=>document.querySelectorAll(`#c-${chat} .kb`).forEach(k=>k.remove());
+function orderCard(o){const dl=o.way==='Доставка';
+  return `🆕 <b>Заказ №${o.no}</b> · ${dl?'🛵 доставка':'🏃 самовывоз'}\n${o.when==='time'?'🕐 <b>ко времени '+o.time+'</b>':'⚡ как можно скорее'}\n`+
+   o.items.map(i=>`• ${esc(i.n)} × ${i.q}${i.p?' — '+rub(i.p*i.q):''}`).join('\n')+
+   (dl?`\n🚚 доставка (${esc(o.zoneName)}): ${o.fee?rub(o.fee):'бесплатно'}`:'')+`\n<b>Итого: ${rub(o.total)}</b> · ${esc(o.pay)}${o.pay==='Наличными'&&o.change!=='Без сдачи'?', сдача с '+o.change:''}\n`+
+   (dl?`📍 ${esc(o.street)}${o.ent?', подъезд '+esc(o.ent):''}${o.floor?', этаж '+esc(o.floor):''}${o.flat?', кв. '+esc(o.flat):''}${o.door?', домофон '+esc(o.door):''}\n`:'')+
+   `👤 ${esc(o.name)}, ${esc(o.phone)}`+(o.note?`\n💬 ${esc(o.note)}`:'')}
+function startFlow(o){FO={...o,st:'new'};document.querySelectorAll('.flow .cb').forEach(c=>c.innerHTML='');
+  addMsg('shop','Новый заказ с сайта',null,true);
+  addMsg('shop',orderCard(FO),`<button data-fa="acc" data-m="30">✓ Принять · 30 мин</button><button data-fa="acc" data-m="45">45 мин</button><button data-fa="acc" data-m="60">60 мин</button><button data-fa="rej">✕ Отклонить</button>`);
+  addMsg('client',`✅ Заказ <b>№${o.no}</b> отправлен в EATandGO на ${rub(o.total)}.\nСейчас заведение его примет, напишем время.`);
+  addMsg('courier','Пока заказов нет. Когда заведение передаст заказ, он появится здесь.',null,true);
+  document.querySelectorAll('.ftab').forEach(t=>t.classList.remove('ping'))}
+document.getElementById('flow').addEventListener('click',e=>{
+  const tab=e.target.closest('.ftab');if(tab){document.querySelectorAll('.ftab').forEach(x=>x.classList.toggle('on',x===tab));tab.classList.remove('ping');
+    document.querySelectorAll('.chat').forEach(c=>c.classList.toggle('on',c.id==='c-'+tab.dataset.ft));return}
+  const b=e.target.closest('[data-fa]');if(!b||!FO)return;const a=b.dataset.fa,dl=FO.way==='Доставка';
+  if(a==='acc'){dropKb('shop');const eta=FO.when==='time'?FO.time:hm(new Date(Date.now()+(+b.dataset.m)*60e3));FO.eta=eta;
+    addMsg('shop',`Заказ №${FO.no} принят, ${dl?'привезти к':'готов к'} <b>${eta}</b>`,`<button data-fa="cook">🔥 Начали готовить</button>`);
+    addMsg('client',`👨‍🍳 Заказ <b>№${FO.no}</b> принят! ${dl?'Привезём примерно к':'Будет готов к'} <b>${eta}</b>.`)}
+  else if(a==='rej'){dropKb('shop');addMsg('shop',`Заказ №${FO.no} отклонён`,null,true);addMsg('client',`😔 К сожалению, заказ №${FO.no} сейчас не можем принять. Позвоните нам: +7 922 442-24-44`)}
+  else if(a==='cook'){dropKb('shop');addMsg('client','🔥 Уже готовим ваш заказ!');
+    addMsg('shop',`№${FO.no} готовится`,dl?`<button data-fa="hand">🛵 Передать курьеру</button>`:`<button data-fa="ready">✅ Готов к выдаче</button>`)}
+  else if(a==='ready'){dropKb('shop');addMsg('client',`✅ Заказ №${FO.no} готов! Ждём вас: Пионерская, 28а, ТЦ «Орбита».`);addMsg('shop',`№${FO.no} ждёт покупателя`,`<button data-fa="given">🤝 Выдан</button>`)}
+  else if(a==='given'){dropKb('shop');addMsg('shop',`№${FO.no} выдан ✔`,null,true);addMsg('client','Спасибо, что выбрали EATandGO! Приятного аппетита 🍔',`<button data-fa="rate">⭐⭐⭐⭐⭐ Оценить</button>`)}
+  else if(a==='hand'){dropKb('shop');addMsg('shop',`№${FO.no} передан курьеру Алексею`,null,true);
+    const q=encodeURIComponent('Нягань, '+FO.street);
+    addMsg('courier',`🛵 <b>Новая доставка №${FO.no}</b> к ${FO.eta||'—'}\n📍 ${esc(FO.street)}${FO.ent?', под. '+esc(FO.ent):''}${FO.floor?', эт. '+esc(FO.floor):''}${FO.flat?', кв. '+esc(FO.flat):''}${FO.door?', домофон '+esc(FO.door):''}\n👤 ${esc(FO.name)}, ${esc(FO.phone)}\n💰 <b>${rub(FO.total)}</b> · ${esc(FO.pay)}${FO.pay==='Наличными'&&FO.change!=='Без сдачи'?', <b>сдача с '+FO.change+'</b>':''}`+(FO.note?`\n💬 ${esc(FO.note)}`:''),
+      `<a href="https://yandex.ru/maps/?text=${q}" target="_blank" rel="noopener">📍 Маршрут</a><a href="tel:${esc(FO.phone.replace(/[^\d+]/g,''))}">📞 Позвонить</a><button data-fa="took">✅ Взял, выезжаю</button>`)}
+  else if(a==='took'){dropKb('courier');addMsg('courier',`В пути с №${FO.no}`,`<button data-fa="deliv">🏁 Доставил</button>`);
+    addMsg('shop',`🛵 Алексей выехал с №${FO.no}`,null,true);addMsg('client','🛵 Курьер Алексей уже едет к вам! Будет минут через 15.')}
+  else if(a==='deliv'){dropKb('courier');addMsg('courier',`№${FO.no} доставлен ✔ ${FO.pay==='Наличными'?'(принято '+rub(FO.total)+' наличными)':''}`,null,true);
+    addMsg('shop',`✅ №${FO.no} доставлен за ${rub(FO.total)}`,null,true);
+    addMsg('client','✅ Доставлено! Приятного аппетита 🍔\nКак вам заказ?',`<button data-fa="rate">⭐⭐⭐⭐⭐ Оценить</button>`)}
+  else if(a==='rate'){dropKb('client');addMsg('client','Спасибо за оценку! ❤️ Ждём снова');addMsg('shop',`⭐ Покупатель №${FO.no} поставил 5 звёзд`,null,true)}
+});
+document.getElementById('flowClose').onclick=()=>document.getElementById('flow').classList.remove('on');
 document.getElementById('shade').onclick=closeCart;document.getElementById('close').onclick=closeCart;
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeCart()});
 tabs();grid();save();
