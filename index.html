@@ -423,13 +423,14 @@ const deliveryFee=()=>F.way!=='Доставка'||total()>=FREE_FROM?0:ZONES[F.z
 // ── подсказки адреса доставки (OpenStreetMap/Photon) и маршрут от заведения (виджет Яндекс Карт + OSRM) ──
 // в рабочей версии — DaData или Геосаджест Яндекса с ключом заказчика
 const SHOP=[62.15387,65.45747]; // ТЦ «Орбита», Пионерская 28а
+// город сверяем и по-русски, и латиницей: при английском языке браузера Photon отвечает «Nyagan»
 let stTmr=null, stItems=[], stAct=-1, stSeq=0;
 const stClose=()=>{const u=document.getElementById('sugSt');if(u)u.classList.remove('on');stAct=-1};
 document.addEventListener('input',e=>{if(e.target.id!=='oStreet')return;F.street=e.target.value;if(F.coords){F.coords=null;F.routeInfo=''}
   clearTimeout(stTmr);const q=e.target.value.trim();if(q.length<3){stClose();return}
-  stTmr=setTimeout(async()=>{const my=++stSeq;try{const d=await (await fetch(`https://photon.komoot.io/api/?q=${encodeURIComponent(q+' Нягань')}&limit=15&lat=${SHOP[0]}&lon=${SHOP[1]}&layer=house&layer=street`)).json();
+  stTmr=setTimeout(async()=>{const my=++stSeq;try{const d=await (await fetch(`https://photon.komoot.io/api/?q=${encodeURIComponent(q+' Нягань')}&limit=15&lat=${SHOP[0]}&lon=${SHOP[1]}&layer=house&layer=street&lang=default`)).json();
     if(my!==stSeq)return; // пришёл ответ на старый запрос — пропускаем, пользователь уже допечатал
-    const seen=new Set();stItems=d.features.filter(f=>f.properties.city==='Нягань').map(f=>{const pp=f.properties;
+    const seen=new Set();stItems=d.features.filter(f=>/^(Нягань|Nyagan)$/.test(f.properties.city||'')).map(f=>{const pp=f.properties;
       const t=pp.type==='street'?pp.name:`${(pp.street||pp.name||'').replace(/^улица /,'')}${pp.housenumber?', '+pp.housenumber:''}`;return {t,c:[f.geometry.coordinates[1],f.geometry.coordinates[0]],street:pp.type==='street'}})
       .filter(x=>x.t&&!seen.has(x.t)&&seen.add(x.t)).slice(0,6);
     // дома нет на карте, но улица есть — предлагаем «улица, номер» по точке улицы
